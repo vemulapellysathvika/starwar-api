@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Star Wars Random Image Generator</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: sans-serif;
+      }
+
+      img {
+        width: 300px;
+        height: 400px;
+        object-fit: cover;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      button {
+        font-size: 1.5rem;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        background-color: #ffc107;
+        color: #212529;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #ffca2b;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Star Wars Random Image Generator</h1>
+    <button id="generate-button">Generate Random Image</button>
+    <div id="image-container"></div>
+
+    <script>
+      const apiUrl = "https://swapi.dev/api";
+      const charactersUrl = apiUrl + "/people/";
+
+      // Get the total number of characters
+      fetch(charactersUrl)
+        .then(response => response.json())
+        .then(charactersData => {
+          const totalCharacters = charactersData.count;
+
+          // Generate a random character ID and image URL
+          const generateRandomImage = () => {
+            const randomId = Math.floor(Math.random() * totalCharacters) + 1;
+            const imageUrl = `https://starwars-visualguide.com/assets/img/characters/${randomId}.jpg`;
+            return { randomId, imageUrl };
+          };
+
+          // Set the initial image and character name
+          const { randomId, imageUrl } = generateRandomImage();
+          const initialName = "Click the button to generate a random image!";
+          const imageElement = document.createElement("img");
+          imageElement.src = imageUrl;
+          imageElement.alt = initialName;
+          document.getElementById("image-container").appendChild(imageElement);
+          const nameElement = document.createElement("p");
+          nameElement.textContent = `Name: ${initialName}`;
+          document.getElementById("image-container").appendChild(nameElement);
+
+          // Add event listener to the generate button
+          document.getElementById("generate-button").addEventListener("click", () => {
+            // Remove the previous image and name
+            imageElement.remove();
+            nameElement.remove();
+
+            // Generate a new random image and character name
+            const { randomId, imageUrl } = generateRandomImage();
+            fetch(charactersUrl + randomId)
+              .then(response => response.json())
+              .then(characterData => {
+                const name = characterData.name;
+                imageElement.src = imageUrl;
+                imageElement.alt = name;
+                nameElement.textContent = `Name: ${name}`;
+              })
+              .catch(error => console.error(error));
+
+            // Append the new image and name
+            document.getElementById("image-container").appendChild(imageElement);
+            document.getElementById("image-container").appendChild(nameElement);
+          });
+        })
+        .catch(error => console.error(error));
+    </script>
+  </body>
+</html>
